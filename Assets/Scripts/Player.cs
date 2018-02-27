@@ -6,6 +6,7 @@ public class Player : MonoBehaviour {
     //Player movimentação
     public float speed = 5f;
     public float jumpforce = 600;
+    
 
     private Rigidbody2D rb2d;
     private bool facingRight = true;
@@ -21,6 +22,12 @@ public class Player : MonoBehaviour {
     private bool crouched;
     private bool lookingUp;
     private bool reloading;
+
+    //Tiro
+    private float fireRate = 0.5f;
+    private float nextFire;
+    public GameObject bulletPreab;
+    public Transform shotSpawner;
 
 	// Use this for initialization
 	void Start (){
@@ -53,8 +60,21 @@ public class Player : MonoBehaviour {
             }
 
             //Se o botão de tiro estiver pressionado, muda a animação tiro
-            if (Input.GetButtonDown("Fire1")){
+            if (Input.GetButtonDown("Fire1") && Time.time > nextFire){
+                nextFire = Time.time + fireRate;
                 anim.SetTrigger("Shoot");
+                GameObject tempBullet = Instantiate(bulletPreab, shotSpawner.position, shotSpawner.rotation);
+
+                //Se o player virar de lado, mudar o tiro e se estiver olhando rpa cima mudar o angulo do tiro
+                if (!facingRight && !lookingUp){
+                    tempBullet.transform.eulerAngles = new Vector3(0, 0, 180);
+                }else if(!facingRight && lookingUp){
+                    tempBullet.transform.eulerAngles = new Vector3(0, 0, 90);
+                }
+
+                if (crouched && !onGround){
+                    tempBullet.transform.eulerAngles = new Vector3(0, 0, -90);
+                }
             }
 
             //definindo botoes de olhar pra cima e abaixar
